@@ -1,0 +1,70 @@
+class VirtualPC:
+    def __init__(self, memory_size=256):
+        # Memória RAM simulada
+        self.memory = [0] * memory_size
+        # Registradores básicos
+        self.registers = {
+            'ACC': 0,  # Acumulador (para operações aritméticas)
+            'PC': 0,   # Program Counter (aponta para a instrução atual)
+            'R1': 0,   # Registrador geral 1
+            'R2': 0    # Registrador geral 2
+        }
+        self.running = True
+
+    def load_program(self, program, start_address=0):
+        """Carrega o programa na memória a partir do endereço inicial."""
+        for i, instruction in enumerate(program):
+            self.memory[start_address + i] = instruction
+        self.registers['PC'] = start_address
+
+    def run(self):
+        """Loop principal de execução (Fetch-Decode-Execute)."""
+        print("--- Iniciando o PC Virtual ---")
+        while self.running:
+            pc = self.registers['PC']
+            opcode = self.memory[pc]
+
+            # Opcode 1: LOAD_IMM (Carrega valor imediato no Acumulador)
+            if opcode == 1:
+                val = self.memory[pc + 1]
+                self.registers['ACC'] = val
+                self.registers['PC'] += 2
+
+            # Opcode 2: ADD (Adiciona um valor ao Acumulador)
+            elif opcode == 2:
+                val = self.memory[pc + 1]
+                self.registers['ACC'] += val
+                self.registers['PC'] += 2
+
+            # Opcode 3: OUT (Imprime o valor atual do Acumulador)
+            elif opcode == 3:
+                print(f"[Saída do Sistema]: {self.registers['ACC']}")
+                self.registers['PC'] += 1
+
+            # Opcode 0: HALT (Para a execução)
+            elif opcode == 0:
+                print("--- PC Virtual Desligado ---")
+                self.running = False
+
+            else:
+                print(f"Erro: Instrução desconhecida '{opcode}' no endereço {pc}")
+                self.running = False
+
+# --- Exemplo de Programa em Linguagem de Máquina ---
+# 1. Carrega o número 15 (Opcode 1, Valor 15)
+# 2. Soma 30 ao valor atual (Opcode 2, Valor 30)
+# 3. Imprime o resultado (Opcode 3)
+# 4. Encerra o sistema (Opcode 0)
+
+programa_exemplo = [
+    1, 15,  # LOAD 15
+    2, 30,  # ADD 30
+    3,      # OUT (Deve resultar em 45)
+    0       # HALT
+]
+
+if __name__ == "__main__":
+    pc_virtual = VirtualPC()
+    pc_virtual.load_program(programa_exemplo)
+    pc_virtual.run()
+    
